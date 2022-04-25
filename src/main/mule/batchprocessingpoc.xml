@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="6f8e1ab9-a605-497e-8852-70f1dac21d8f" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="batchprocessingpocFlow" doc:id="45a16e71-45b3-42ad-b195-808b42dd1d28" >
+		<http:listener doc:name="Listener" doc:id="672e5d51-f8c2-46e6-b9ab-6652bb0bdfcb" config-ref="HTTP_Listener_config" path="/batchprocessing"/>
+		<set-payload value='#[[1,2,"a",4,5,"b","c"]]' doc:name='[1,2,"a",4,5,"b","c"]' doc:id="22c5580e-45a4-416d-97f5-9d8d31a05840" />
+		<batch:job jobName="batchprocessingpocBatch_Job" doc:id="ddcd283a-e80e-4538-b861-f1ed49143229" >
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="606a19f4-d819-4ac8-a50a-ad02e0c658a1" acceptPolicy="ALL">
+					<set-payload value="#[payload *10]" doc:name="payload*10" doc:id="c2600df5-b86a-4e50-9433-524f8c1d9f13" />
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="2f0955e4-22af-456d-b174-270293e79cb3" size="2">
+						<logger level="INFO" doc:name="Logger" doc:id="6d0880bd-6e2b-469e-978d-d980062a36e2" message='#[payload]'/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="d04a073c-e9b8-4c1f-9b26-8442c5c60868" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+	</flow>
+</mule>
